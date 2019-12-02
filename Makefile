@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := esp-idf-hfd
+PROJECT_NAME := hfd-project
 
 include $(IDF_PATH)/make/project.mk
 
