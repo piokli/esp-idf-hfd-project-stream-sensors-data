@@ -4,6 +4,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "../components/lsm6ds33_lps25h_i2c/lsm6ds33_lps25h_i2c.h"
+#include "../components/i2c_helper/i2c_helper.h"
+//#include "../components/lps25h/lps25h.h"
 
 
 void app_main()
