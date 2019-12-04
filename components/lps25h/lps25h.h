@@ -46,7 +46,7 @@
 /** LPS25H WHO_AM_I identifier */
 #define LPS25H_WHO_ID 0xBD
 
-/** CTRL_REG1 Settings */  //@TODO define all settings from datasheet
+/** LPS25H CTRL_REG1 Settings */  //@TODO define all settings from datasheet
 #define LPS25H_POWER_UP     0x80
 #define LPS25H_BDU_SET      0x04
 
@@ -56,13 +56,23 @@
 #define LPS25H_DATA_OUTPUT_RATE_12_5_HZ      0x30
 #define LPS25H_DATA_OUTPUT_RATE_25_HZ        0x40
 
-/** STATUS_REG Options */
+/** LPS25H STATUS_REG Options */
 #define LPS25H_PRESS_DATA_AVAIABLE    0x02
 #define LPS25H_TEMP_DATA_AVAIABLE     0x01
 #define LPS25H_PRESS_DATA_OVERRUN     0x10
 #define LPS25H_TEMP_DATA_OVERRUN      0x08
 
-/** Functions **/
+/** LPS25H Data Resolution Configuration */ //--- or call them masks or something?
+#define LPS25H_PRESS_RES_8      0x00
+#define LPS25H_PRESS_RES_32     0x01
+#define LPS25H_PRESS_RES_128    0x02
+#define LPS25H_PRESS_RES_512    0x03
+#define LPS25H_TEMP_RES_8       0x00
+#define LPS25H_TEMP_RES_16      0x04
+#define LPS25H_TEMP_RES_32      0x08
+#define LPS25H_TEMP_RES_64      0x0C
+
+/** LPS25H Functions **/
 
 esp_err_t lps25h_test_connection(void);
 

@@ -94,8 +94,9 @@ esp_err_t lps25h_read_press()
         i2c_cmd_link_delete(cmd);
 
         pressure = ((p_h << 16) | (p_l << 8) | p_xl);
+        printf("p_xl: %d/n", p_xl);
         printf("Pressure: %f\n", pressure / 4096.0);
-        //printf("Pressure: %lu\n", (unsigned long)pressure);
+        printf("Pressure raw: %lu\n", (unsigned long)pressure);
     }
     else
     {
@@ -134,5 +135,16 @@ esp_err_t lps25h_complete_setup(void)
     i2c_cmd_link_delete(cmd);
 
     printf("CTRL_REG1: %X\n", data);
+
+    //pressure resolution quick set (very raw - temp set to8, press set to 512)
+	cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, (LPS25H_I2C_ADDR << 1) | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, LPS25H_RES_CONF_ADDR, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, LPS25H_PRESS_RES_512, ACK_CHECK_EN);
+    i2c_master_stop(cmd);
+    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+
     return ret;
 }

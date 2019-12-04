@@ -12,7 +12,8 @@
 
 void app_main()
 {
-	i2c_master_init();
+	int i = 0;
+	my_i2c_master_init();
 	lps25h_complete_setup();
 	vTaskDelay(100 / portTICK_PERIOD_MS);
 
@@ -20,6 +21,7 @@ void app_main()
 	{
 		lps25h_read_press();
 		vTaskDelay(100 / portTICK_PERIOD_MS);
+		printf("%d\n", i++);
 	}
 	/*
 	while(1)
