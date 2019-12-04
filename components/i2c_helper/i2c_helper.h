@@ -14,7 +14,7 @@
 #define I2C_MASTER_NUM 1 				// as it was default in I2C's example sdkconfig.h; it is master's port number - maybe it's because there can be more
 #define I2C_MASTER_SDA_IO 23			// gpio number for i2c slave data
 #define I2C_MASTER_SCL_IO 22			// gpio number for i2c slave clock
-#define I2C_MASTER_FREQ_HZ 100000		// default as in sdkconfig.h of I2C's example
+#define I2C_MASTER_FREQ_HZ 100000		// default as in sdkconfig.h of I2C's example 100kH is max for barometer in normal mode
 #define I2C_MASTER_RX_BUF_DISABLE 0		// I2C master doesn't need buffer
 #define I2C_MASTER_TX_BUF_DISABLE 0 	// I2C master doesn't need buffer
 
