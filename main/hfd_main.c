@@ -13,15 +13,16 @@
 void app_main()
 {
 	int i = 0;
-	my_i2c_master_init();
-	lps25h_complete_setup();
+	i2c_helper_master_init();
+	//lps25h_complete_setup();
 	vTaskDelay(100 / portTICK_PERIOD_MS);
 
 	while(1)
 	{
-		lps25h_read_press();
+		printf("[%d] : ", i++);
+		//lps25h_get_temp(); lps25h not working...
+		//lps25h_read_press();
 		vTaskDelay(100 / portTICK_PERIOD_MS);
-		printf("%d\n", i++);
 	}
 	/*
 	while(1)

@@ -37,7 +37,7 @@
  *     - ESP_OK Success
  *     - ESP_ERR_INVALID_ARG Parameter error
  */
-esp_err_t my_i2c_master_init(void);
+esp_err_t i2c_helper_master_init(void);
 
 /**
  * @brief Write buffer data to chosen register
