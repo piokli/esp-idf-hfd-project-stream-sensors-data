@@ -7,6 +7,10 @@
 
 #include "i2c_helper.h"
 
+#include "freertos/FreeRTOS.h"
+#include <esp_err.h>
+#include "sdkconfig.h"
+
 esp_err_t i2c_helper_master_init(void)
 {
     int i2c_master_port = I2C_MASTER_NUM;
@@ -41,7 +45,21 @@ esp_err_t i2c_helper_write_reg(uint8_t slave_id, uint8_t reg_addr, uint8_t *data
 
 esp_err_t i2c_helper_read_reg(uint8_t slave_id, uint8_t reg_addr, uint8_t *data_rd, size_t size)
 {
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+	i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+	i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, (slave_id << 1) | WRITE_BIT, ACK_CHECK_EN);
+
+    i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
+
+    i2c_master_stop(cmd);
+    esp_err_t ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+
+	if (ret != ESP_OK) {
+        return ret;
+    }
+
+    cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, (slave_id << 1) | READ_BIT, ACK_CHECK_EN);
 
@@ -51,7 +69,7 @@ esp_err_t i2c_helper_read_reg(uint8_t slave_id, uint8_t reg_addr, uint8_t *data_
     i2c_master_read_byte(cmd, data_rd + size - 1, NACK_VAL);
 
     i2c_master_stop(cmd);
-    esp_err_t ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     return ret;
 }

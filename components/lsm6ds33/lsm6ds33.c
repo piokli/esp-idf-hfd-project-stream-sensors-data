@@ -10,6 +10,9 @@
 #include <math.h>
 #include <driver/i2c.h>
 #include <esp_err.h>
+#include "esp_log.h"
+
+static const char* TAG = "lsm6ds33";
 
 enum LSM6DS33_regAddr
 {
@@ -83,6 +86,51 @@ enum LSM6DS33_regAddr
 	MD2_CFG           = 0x5F,
 };
 
+esp_err_t lsm6ds33_test_connection(void)
+{
+	uint8_t get_id;
+
+	esp_err_t ret = i2c_helper_read_reg(LSM6DS33_I2C_ADDR, LSM6DS33_WHO_AM_I_ADDR, &get_id, 1);
+	if (ret != ESP_OK) {
+        return ret;
+    }
+    if (get_id != LSM6DS33_WHO_ID)
+    {
+    	ESP_LOGW(TAG, "Failed to connect to LSM6DS33!");
+    	return ESP_FAIL;
+    }
+    ESP_LOGI(TAG, "Connected to LSM6DS33");
+
+    return ESP_OK;
+}
+
+esp_err_t lsm6ds33_default_setup(void)
+{
+	esp_err_t ret;
+
+	uint8_t ctrl1_xl_setup = LSM6DS33_ACC_DATA_RATE_104_HZ |
+			                 LSM6DS33_ACC_FULL_SCALE_2_G |
+							 LSM6DS33_ACC_AA_BANDWIDTH_200_HZ;
+
+	uint8_t ctrl2_g_setup = LSM6DS33_GYRO_DATA_RATE_104_HZ |
+			                LSM6DS33_GYRO_FULL_SCALE_250_DPS;
+
+	// ctrl3_c_setup; ctrl4_c_setup; ctrl5_c_setup;
+	// ctrl6_c_setup(acc hi-perf); ctr7_c_setup(gyro hi-perf);
+	// ctrl8_xl_setup; ctr9_xl_setup(acc axis en); ctr10_c_setup(gyro axis en)
+	// ^these are all *ctrl registers, using defaults for now
+	// there are also plenty more of settings for internal functions and interrupts
+
+	ret = i2c_helper_write_reg(LSM6DS33_I2C_ADDR, LSM6DS33_CTRL1_XL_ADDR, &ctrl1_xl_setup, 1);
+	if (ret != ESP_OK) {
+	    return ret;
+	}
+	ret = i2c_helper_write_reg(LSM6DS33_I2C_ADDR, LSM6DS33_CTRL2_G_ADDR, &ctrl2_g_setup, 1);
+
+	return ret;
+}
+
+/*
 
 esp_err_t LSM6DS33_read_acc(struct vector *a)
 {
@@ -97,7 +145,7 @@ esp_err_t LSM6DS33_read_acc(struct vector *a)
 
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (LSM6DS33_ADDR << 1) | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (LSM6DS33_I2C_ADDR << 1) | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, OUTX_L_XL, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
@@ -108,7 +156,7 @@ esp_err_t LSM6DS33_read_acc(struct vector *a)
     vTaskDelay(30 / portTICK_RATE_MS);
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (LSM6DS33_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (LSM6DS33_I2C_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
     i2c_master_read_byte(cmd, &ax_l, ACK_VAL);
     i2c_master_read_byte(cmd, &ax_h, ACK_VAL);
     i2c_master_read_byte(cmd, &ay_l, ACK_VAL);
@@ -126,9 +174,6 @@ esp_err_t LSM6DS33_read_acc(struct vector *a)
     return ret;
 }
 
-/**
- * Reads and writes x, y, z gyroscope values to gyro vector
- */
 esp_err_t LSM6DS33_read_gyro(struct vector *g)
 {
 	int ret;
@@ -142,7 +187,7 @@ esp_err_t LSM6DS33_read_gyro(struct vector *g)
 
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (LSM6DS33_ADDR << 1) | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (LSM6DS33_I2C_ADDR << 1) | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, OUTX_L_G, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
@@ -153,7 +198,7 @@ esp_err_t LSM6DS33_read_gyro(struct vector *g)
     vTaskDelay(30 / portTICK_RATE_MS);
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (LSM6DS33_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (LSM6DS33_I2C_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
     i2c_master_read_byte(cmd, &gx_l, ACK_VAL);
     i2c_master_read_byte(cmd, &gx_h, ACK_VAL);
     i2c_master_read_byte(cmd, &gy_l, ACK_VAL);
@@ -185,7 +230,7 @@ void vector_normalize(struct vector *a)
 	a->z /= mag;
 }
 
-/*
+
 static esp_err_t write_reg(enum LSM6DS33_regAddr reg, uint8_t value)
 {
 	int ret;
@@ -199,14 +244,14 @@ static esp_err_t write_reg(enum LSM6DS33_regAddr reg, uint8_t value)
     i2c_cmd_link_delete(cmd);
     return ret;
 }
-*/
+
 
 static uint8_t read_reg(enum LSM6DS33_regAddr reg, uint8_t *data_h, uint8_t *data_l)
 {
 	int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (LSM6DS33_ADDR << 1) | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (LSM6DS33_I2C_ADDR << 1) | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
@@ -217,7 +262,7 @@ static uint8_t read_reg(enum LSM6DS33_regAddr reg, uint8_t *data_h, uint8_t *dat
     vTaskDelay(30 / portTICK_RATE_MS);
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (LSM6DS33_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (LSM6DS33_I2C_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
     i2c_master_read_byte(cmd, data_h, ACK_VAL);
     i2c_master_read_byte(cmd, data_l, NACK_VAL);
     i2c_master_stop(cmd);
@@ -226,33 +271,4 @@ static uint8_t read_reg(enum LSM6DS33_regAddr reg, uint8_t *data_h, uint8_t *dat
     return ret;
 }
 
-esp_err_t LSM6DS33_test_connection(void)	// initialize or rather check
-{
-	uint8_t sensor_data_h, sensor_data_l;
-	read_reg(WHO_AM_I, &sensor_data_h, &sensor_data_l);
-
-	if (sensor_data_h == LSM6DS33_WHO_ID)
-	{
-		return ESP_OK;
-	}
-	return ESP_ERR_INVALID_RESPONSE;
-}
-
-esp_err_t LSM6DS33_default_setup(void)	// sensor setup and read loop
-{
-    int ret;
-    vTaskDelay(30 / portTICK_RATE_MS);													// LSM6 boots up for about 20 miliseconds?
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();										// start cmd link to queue commands
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (LSM6DS33_ADDR << 1) | WRITE_BIT, ACK_CHECK_EN);
-    //i2c_master_write_byte(cmd, CTRL9_XL, ACK_CHECK_EN);									// Acc X, Y, Z axes enabled-- what? doesnt work?
-    //i2c_master_write_byte(cmd, 0x38, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, CTRL1_XL, ACK_CHECK_EN);									// Acc = 416 Hz (High performance mode)
-    i2c_master_write_byte(cmd, 0x60, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, CTRL3_C, ACK_CHECK_EN);									// auto increment register
-    i2c_master_write_byte(cmd, 0x04, ACK_CHECK_EN);
-    i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
-    i2c_cmd_link_delete(cmd);
-    return ret;
-}
+*/

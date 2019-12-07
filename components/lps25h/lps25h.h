@@ -40,11 +40,13 @@
 #define	LPS25H_RPDS_L_ADDR            0x39
 #define	LPS25H_RPDS_H_ADDR            0x3A
 
-/** LPS25H I2C Address and WHO_AM_I */
+/** LPS25H I2C Address */
 #define LPS25H_I2C_ADDR 0x5D
 
 /** LPS25H WHO_AM_I identifier */
-#define LPS25H_WHO_ID 0xBD
+#define LPS25H_WHO_ID 0xBD     // add primary and secondary
+
+//-------------------------------------------------------------
 
 /** LPS25H CTRL_REG1 Settings */    //@TODO define all settings from datasheet
 #define LPS25H_POWER_UP     0x80
@@ -74,11 +76,9 @@
 
 /** LPS25H Functions **/
 
-esp_err_t lps25h_complete_setup(void);
-
-esp_err_t lps25h_get_temp(); // <- void for test
-
 esp_err_t lps25h_test_connection(void);
+
+esp_err_t lps25h_default_setup(void);
 
 esp_err_t lps25h_read_press();
 
