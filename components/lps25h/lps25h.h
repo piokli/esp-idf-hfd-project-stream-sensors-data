@@ -80,6 +80,6 @@ esp_err_t lps25h_test_connection(void);
 
 esp_err_t lps25h_default_setup(void);
 
-esp_err_t lps25h_read_press();
+esp_err_t lps25h_read_press_raw(uint32_t *pressure);
 
 #endif /* COMPONENTS_LPS25H_LPS25H_H_ */

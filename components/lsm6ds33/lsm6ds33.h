@@ -130,42 +130,28 @@
 #define LSM6DS33_GYRO_FULL_SCALE_2000_DPS    0x0C
 #define LSM6DS33_GYRO_FULL_SCALE_125_DPS     0x02
 
-/**
- * Structure for better keeping the x, y and z values of accelerometer and gyroscope
- */
+
+/** Structure for better keeping the x, y and z values of accelerometer and gyroscope */
 struct vector {
 	float x;
 	float y;
 	float z;
 };
 
+/** LSM6DS33 functions */
+
 esp_err_t lsm6ds33_test_connection(void);
 
 esp_err_t lsm6ds33_default_setup(void);
 
+esp_err_t lsm6ds33_read_acc_raw(struct vector *a);
 
+esp_err_t lsm6ds33_read_gyro_raw(struct vector *g);
 
-/**
- *
- */
-float vector_magnitude(struct vector *v);
+void lsm6ds33_vector_normalise(struct vector *a);
 
-/**
- *
- */
-void vector_normalize(struct vector *a);
+float lsm6ds33_vector_magnitude_of(struct vector v);
 
-/**
- * Reads and writes x, y, z accelerometer values to acc vector
- *
- * @TODO should check status reg maybe in the future?
- */
-esp_err_t LSM6DS33_read_acc(struct vector *a);
-
-/**
- * Reads and writes x, y, z gyroscope values to gyro vector
- */
-esp_err_t LSM6DS33_read_gyro(struct vector *g);
 
 
 

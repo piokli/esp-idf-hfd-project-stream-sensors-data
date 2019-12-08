@@ -63,9 +63,20 @@ esp_err_t i2c_helper_read_reg(uint8_t slave_id, uint8_t reg_addr, uint8_t *data_
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, (slave_id << 1) | READ_BIT, ACK_CHECK_EN);
 
+
     if (size > 1) {
         i2c_master_read(cmd, data_rd, size - 1, ACK_VAL);
     }
+
+    /*
+    size_t len = 0;
+    while (len < size - 1)
+    {
+    	i2c_master_read_byte(cmd, data_rd + len, ACK_VAL);
+    	++len;
+    }
+	*/
+
     i2c_master_read_byte(cmd, data_rd + size - 1, NACK_VAL);
 
     i2c_master_stop(cmd);
