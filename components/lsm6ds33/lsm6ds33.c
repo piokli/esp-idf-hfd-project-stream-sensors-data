@@ -79,6 +79,10 @@ esp_err_t lsm6ds33_read_acc_raw(struct vector *a)
     a->y = (int16_t)((ay[1] << 8) | ay[0]);
     a->z = (int16_t)((az[1] << 8) | az[0]);
 
+    free(ax);
+    free(ay);
+    free(az);
+
     return ret;
 }
 
@@ -99,6 +103,10 @@ esp_err_t lsm6ds33_read_gyro_raw(struct vector *g)
     g->x = (int16_t)((gx[1] << 8) | gx[0]);
     g->y = (int16_t)((gy[1] << 8) | gy[0]);
     g->z = (int16_t)((gz[1] << 8) | gz[0]);
+
+    free(gx);
+    free(gy);
+    free(gz);
 
     return ret;
 }

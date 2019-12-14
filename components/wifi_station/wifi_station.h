@@ -30,6 +30,10 @@
 #define EXAMPLE_ESP_WIFI_PASS      "13170349"
 #define EXAMPLE_ESP_MAXIMUM_RETRY  5
 
+
+/* FreeRTOS event group to signal when we are connected*/
+EventGroupHandle_t s_wifi_event_group;
+
 void wifi_init_sta();
 
 #endif /* COMPONENTS_WIFI_STATION_WIFI_STATION_H_ */

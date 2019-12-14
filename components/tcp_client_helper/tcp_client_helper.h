@@ -21,6 +21,8 @@
 //#include "nvs_flash.h"
 #include "tcpip_adapter.h"
 //#include "protocol_examples_common.h"
+#include "../wifi_station/wifi_station.h"
+
 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
@@ -28,7 +30,7 @@
 #include <lwip/netdb.h>
 
 #define HOST_IP_ADDR "192.168.1.100"
-#define PORT 23
+#define PORT 65531
 
 void tcp_client_task(void *pvParameters);
 

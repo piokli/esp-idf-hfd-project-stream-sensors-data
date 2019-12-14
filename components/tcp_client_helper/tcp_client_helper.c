@@ -8,16 +8,28 @@
 #include "tcp_client_helper.h"
 
 static const char *TAG = "tcp client";
-static const char *payload = "Message from ESP32 to you!";
 
-/*static */void tcp_client_task(void *pvParameters)
+void tcp_client_task(void *pvParameters)
 {
+	//float mag;
+	//uint32_t tick;
+
+	//char *text_to_send;
+	//text_to_send = (char*)pvParameters;
+
+	QueueHandle_t getQueue = pvParameters;
+	char* tx_buffer;
+
     char rx_buffer[128];
     char addr_str[128];
     int addr_family;
     int ip_protocol;
 
     while (1) {
+    	ESP_LOGI(TAG, "Gonna be waiting for established wi-fi");
+    	xEventGroupWaitBits(s_wifi_event_group, BIT0, 1, 0, 15000 / portTICK_RATE_MS);
+    	ESP_LOGI(TAG, "wifi is established");
+
         struct sockaddr_in dest_addr;
         dest_addr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);
         dest_addr.sin_family = AF_INET;
@@ -41,12 +53,27 @@ static const char *payload = "Message from ESP32 to you!";
         ESP_LOGI(TAG, "Successfully connected");
 
         while (1) {
-            int err = send(sock, payload, strlen(payload), 0);                                // send data
+        	printf("got it\n");
+        	xQueueReceive(getQueue, &tx_buffer, 1000);
+        	//printf("Received mag: %.2f\n", mag);
+        	//printf("hejkaaaa\n");
+        	//tick = xTaskGetTickCount();
+        	//sprintf(tx_buffer, "%u, %f\n", tick, mag); // na tπ chwilÍ oszukany czas - powinienem przekazywac strukture z danymi wszystkimi
+        	//albo sam wskaznik do sformatowanego juz stringa z danymi
+        	//no≥p, struktura z danymi ok ale nie wysy≥am wskaünik do niej tylko stringa juø gotowego (ewentualnie wskaünik do stringa, szybsze i lepsze)
+
+        	// below i am trying to send my data and not that "const payload"
+            int err = send(sock, tx_buffer, strlen(tx_buffer), 0); //text_to_send, strlen(text_to_send), 0);//payload, strlen(payload), 0);                                // send data
+            free(tx_buffer);
             if (err < 0) {
                 ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
                 break;
             }
+            //vTaskDelay(10 / portTICK_PERIOD_MS);
+            //free(tx_buffer); //it is automaticly freed
 
+
+            //when i disable recv and if else then tcp stops sending after a while and program crashes of memory leaking
             int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
             // Error occurred during receiving
             if (len < 0) {
@@ -60,7 +87,9 @@ static const char *payload = "Message from ESP32 to you!";
                 ESP_LOGI(TAG, "%s", rx_buffer);
             }
 
-            vTaskDelay(2000 / portTICK_PERIOD_MS);
+
+
+            //vTaskDelay(10 / portTICK_PERIOD_MS);
         }
 
         if (sock != -1) {
@@ -71,3 +100,4 @@ static const char *payload = "Message from ESP32 to you!";
     }
     vTaskDelete(NULL);
 }
+
