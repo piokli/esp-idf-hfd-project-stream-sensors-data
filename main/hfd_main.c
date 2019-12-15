@@ -20,7 +20,10 @@ QueueHandle_t xQueue;
 void send_sensors_data_task(void *pvParameters)
 {
 	struct vector acc_data;
+	struct vector gyro_data;
 	float acc_mag;
+	float gyro_mag;
+	uint32_t press_data;
 	uint32_t tick;
 
 	//char string_buff[128];
@@ -30,14 +33,22 @@ void send_sensors_data_task(void *pvParameters)
 	{
 		tick = xTaskGetTickCount();
 		lsm6ds33_read_acc_raw(&acc_data);
+		lsm6ds33_read_gyro_raw(&gyro_data);
+		lps25h_read_press_raw(&press_data);
+
 		acc_mag = lsm6ds33_vector_magnitude_of(acc_data);
+		gyro_mag = lsm6ds33_vector_magnitude_of(gyro_data);
+
 		lsm6ds33_vector_normalise(&acc_data);
+		lsm6ds33_vector_normalise(&gyro_data);
+
 		//tutaj u¿ywam snprintfa i wysy³am stringa do xQueue
 		string_buff = (char*)malloc(128);// * sizeof(char));
 		//a co je¿eli nie odbiorê danej z kolejki i nie zrobie free wtedy?? @TODO naprawic to trzeba bedzie
 
 		//printf("Sent acc_mag: %.2f, acc_x: %.2f, acc_y: %.2f, acc_z: %.2f\n", acc_mag, acc_data.x, acc_data.y, acc_data.z);
-		snprintf(string_buff, 128, "%u, %.2f, %.2f, %.2f, %.2f\n", tick, acc_mag, acc_data.x, acc_data.y, acc_data.z);
+		//snprintf(string_buff, 128, "%u, %.2f, %.2f, %.2f, %.2f\n", tick, acc_mag, acc_data.x, acc_data.y, acc_data.z);
+		snprintf(string_buff, 128, "%u, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %lu\n", tick, acc_mag, acc_data.x, acc_data.y, acc_data.z, gyro_mag, gyro_data.x, gyro_data.y, gyro_data.z, (unsigned long)press_data);
 		printf("sent: %s", string_buff);
 
 		//xQueueSendToBack(xQueue, &acc_mag, 0); //send too queue
@@ -94,6 +105,7 @@ void app_main()
 
 	// Setup sensors
 	lsm6ds33_default_setup();
+	lps25h_default_setup();
 
 	// TASKS
 	xQueue = xQueueCreate(10, sizeof(char*));
