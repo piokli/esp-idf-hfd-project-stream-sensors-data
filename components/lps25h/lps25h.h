@@ -74,6 +74,22 @@
 #define LPS25H_TEMP_AVG_32      0x08
 #define LPS25H_TEMP_AVG_64      0x0C
 
+/** LPS25H FIFO_CTRL Options **/
+#define LPS25H_BYPASS_MODE      		0x00
+#define LPS25H_FIFO_MODE      			0x20
+#define LPS25H_STREAM_MODE      		0x40
+#define LPS25H_STREAM_TO_FIFO_MODE      0x60
+#define LPS25H_BYPASS_TO_STREAM_MODE    0x80
+//#define LPS25H_UNAVAIABLE     		0xA0
+#define LPS25H_FIFO_MEAN_MODE      		0xC0
+#define LPS25H_BYPASS_TO_FIFO_MODE      0xE0
+//number of samples for moving average (watermark levels WTM_POINT[4:0])
+#define LPS25H_FIFO_MEAN_SAMPLES_2		0x01
+#define LPS25H_FIFO_MEAN_SAMPLES_4      0x03
+#define LPS25H_FIFO_MEAN_SAMPLES_8      0x07
+#define LPS25H_FIFO_MEAN_SAMPLES_16   	0x0F
+#define LPS25H_FIFO_MEAN_SAMPLES_32   	0x1F
+
 /** LPS25H Functions **/
 
 esp_err_t lps25h_test_connection(void);

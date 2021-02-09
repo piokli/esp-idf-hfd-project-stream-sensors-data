@@ -20,7 +20,7 @@ void tcp_client_task(void *pvParameters)
 	QueueHandle_t getQueue = pvParameters;
 	char* tx_buffer;
 
-    char rx_buffer[128];
+    //char rx_buffer[128];
     char addr_str[128];
     int addr_family;
     int ip_protocol;
@@ -53,26 +53,23 @@ void tcp_client_task(void *pvParameters)
         ESP_LOGI(TAG, "Successfully connected");
 
         while (1) {
-        	printf("got it\n");
-        	xQueueReceive(getQueue, &tx_buffer, 1000);
-        	//printf("Received mag: %.2f\n", mag);
-        	//printf("hejkaaaa\n");
-        	//tick = xTaskGetTickCount();
-        	//sprintf(tx_buffer, "%u, %f\n", tick, mag); // na tπ chwilÍ oszukany czas - powinienem przekazywac strukture z danymi wszystkimi
-        	//albo sam wskaznik do sformatowanego juz stringa z danymi
-        	//no≥p, struktura z danymi ok ale nie wysy≥am wskaünik do niej tylko stringa juø gotowego (ewentualnie wskaünik do stringa, szybsze i lepsze)
+        	if (!xQueueReceive(getQueue, &tx_buffer, portMAX_DELAY)) {
+        		ESP_LOGE(TAG, "Qeueueueuue BADD");
+        	} else {
+        		ESP_LOGI(TAG, "QUEUE GUT");
+        	}
 
-        	// below i am trying to send my data and not that "const payload"
-            int err = send(sock, tx_buffer, strlen(tx_buffer), 0); //text_to_send, strlen(text_to_send), 0);//payload, strlen(payload), 0);                                // send data
-            free(tx_buffer);
+            int err = send(sock, tx_buffer, strlen(tx_buffer), 0); //MSG_DONTWAIT);
             if (err < 0) {
                 ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
                 break;
             }
+            free(tx_buffer);
+
             //vTaskDelay(10 / portTICK_PERIOD_MS);
-            //free(tx_buffer); //it is automaticly freed
+            //free(tx_buffer); //it is automaticly freed... or is it?
 
-
+/*
             //when i disable recv and if else then tcp stops sending after a while and program crashes of memory leaking
             int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
             // Error occurred during receiving
@@ -86,7 +83,7 @@ void tcp_client_task(void *pvParameters)
                 ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
                 ESP_LOGI(TAG, "%s", rx_buffer);
             }
-
+*/
 
 
             //vTaskDelay(10 / portTICK_PERIOD_MS);

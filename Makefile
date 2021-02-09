@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := hfd-project
+PROJECT_NAME := hfd-project-stream-sensors-data
 
 include $(IDF_PATH)/make/project.mk
 

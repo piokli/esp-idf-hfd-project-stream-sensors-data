@@ -38,7 +38,16 @@ esp_err_t lps25h_default_setup(void)
 	uint8_t res_conf_setup = LPS25H_PRESS_AVG_512 |
 			                 LPS25H_TEMP_AVG_16;
 
+	// Forgot to implement FIFO Mean Mode on the first time...
+
+	uint8_t fifo_ctrl_setup = LPS25H_FIFO_MEAN_MODE |
+			              	  LPS25H_FIFO_MEAN_SAMPLES_32;
+
 	esp_err_t ret = i2c_helper_write_reg(LPS25H_I2C_ADDR, LPS25H_CTRL_REG1_ADDR, &ctrl_reg1_setup, 1); // size equals 1, maybe should create a variable?
+    if (ret != ESP_OK) {
+        return ret;
+    }
+    ret = i2c_helper_write_reg(LPS25H_I2C_ADDR, LPS25H_FIFO_CTRL_ADDR, &fifo_ctrl_setup, 1);
     if (ret != ESP_OK) {
         return ret;
     }
@@ -64,6 +73,8 @@ esp_err_t lps25h_read_press_raw(uint32_t *pressure)
     //ESP_LOGI(TAG, "p_h: %d p_l: %d p_xl: %d", buff[2], buff[1], buff[0]);
     //ESP_LOGI(TAG, "%f", (((buff[2] << 16) | (buff[1] << 8) | buff[0])) / 4096.0);
     *pressure = (uint32_t)((buff[2] << 16) | (buff[1] << 8) | buff[0]);
+
+    free(buff);
 
     return ret;
 }

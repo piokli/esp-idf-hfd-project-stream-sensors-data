@@ -148,6 +148,10 @@ esp_err_t lsm6ds33_read_acc_raw(struct vector *a);
 
 esp_err_t lsm6ds33_read_gyro_raw(struct vector *g);
 
+void lsm6ds33_vector_calculate_acc_raw(struct vector *a);
+
+void lsm6ds33_vector_calculate_gyro_raw(struct vector *g);
+
 void lsm6ds33_vector_normalise(struct vector *a);
 
 float lsm6ds33_vector_magnitude_of(struct vector v);
