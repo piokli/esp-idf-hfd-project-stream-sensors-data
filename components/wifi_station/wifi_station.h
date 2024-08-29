@@ -26,13 +26,13 @@
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      "Wifi-Dom" //"UPC3202031"
-#define EXAMPLE_ESP_WIFI_PASS      "Klimek47" //"bmz2vTxnF2as"
+#define EXAMPLE_ESP_WIFI_SSID      "PLAY_Swiatlowodowy_D5DD" //Wifi-Dom" //"UPC3202031"
+#define EXAMPLE_ESP_WIFI_PASS      "NcMmKqw4x9" //"Klimek47" //"bmz2vTxnF2as"
 #define EXAMPLE_ESP_MAXIMUM_RETRY  5
 
 
 /* FreeRTOS event group to signal when we are connected*/
-EventGroupHandle_t s_wifi_event_group;
+extern EventGroupHandle_t s_wifi_event_group;
 
 void wifi_init_sta();
 

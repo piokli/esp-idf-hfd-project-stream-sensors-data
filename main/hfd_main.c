@@ -9,7 +9,7 @@
 #include <math.h>
 #include "nvs_flash.h"
 #include "driver/gpio.h"
-#include "driver/adc.h"
+// #include "driver/adc.h"
 
 #include "../components/i2c_helper/i2c_helper.h"
 #include "../components/lps25h/lps25h.h"
@@ -30,7 +30,7 @@ static const char *TAG_main = "main";
 static int Button_Pressed = 0;
 
 static char tag[] = "test_button_intr";
-static xQueueHandle gpio_evt_queue = NULL;
+static QueueHandle_t gpio_evt_queue = NULL;
 
 static void IRAM_ATTR gpio_isr_handler(void* arg)
 {
@@ -46,7 +46,7 @@ static void gpio_task_example(void* arg)
     //disable pull-down mode
     io_conf.pull_down_en = 0;
     //interrupt of rising edge
-    io_conf.intr_type = GPIO_PIN_INTR_LOLEVEL;
+    io_conf.intr_type = GPIO_INTR_LOW_LEVEL;
     //bit mask of the pins, use GPIO4/5 here
     io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
     //set as input mode
@@ -74,7 +74,7 @@ static void gpio_task_example(void* arg)
         	uint32_t current_tick = xTaskGetTickCount();
 
         	if (current_tick - last_tick > 10) {
-        		ESP_LOGI(tag, "GPIO[%d] intr, bttn pressed %d time", io_num, cnt);
+        		ESP_LOGI(tag, "GPIO[%lu] intr, bttn pressed %lu time", io_num, cnt);
 
         		/*
         		if (!xQueueSendToBack(xQueue, &msg_buff, 0)) {
@@ -127,11 +127,11 @@ void send_sensors_data_task(void *pvParameters)
 		acc_mag = lsm6ds33_vector_magnitude_of(acc_data);
 		gyro_mag = lsm6ds33_vector_magnitude_of(gyro_data);
 
-		//tutaj u¿ywam snprintfa i wysy³am stringa do xQueue
+		//tutaj uï¿½ywam snprintfa i wysyï¿½am stringa do xQueue
 		string_buff = (char*)malloc(128);// * sizeof(char));
-		//a co je¿eli nie odbiorê danej z kolejki i nie zrobie free wtedy?? @TODO naprawic to trzeba bedzie
+		//a co jeï¿½eli nie odbiorï¿½ danej z kolejki i nie zrobie free wtedy?? @TODO naprawic to trzeba bedzie
 
-		snprintf(string_buff, 128, "%llu, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %lu\n", esp_timer_get_time()  /* esp_log_timestamp() tick / portTICK_PERIOD_MS*/, acc_mag, acc_data.x, acc_data.y, acc_data.z, gyro_mag, gyro_data.x, gyro_data.y, gyro_data.z, (unsigned long)press_data);
+		snprintf(string_buff, 128, "%lu, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %lu\n", esp_log_timestamp()  /* esp_log_timestamp() tick / portTICK_PERIOD_MS*/, acc_mag, acc_data.x, acc_data.y, acc_data.z, gyro_mag, gyro_data.x, gyro_data.y, gyro_data.z, (unsigned long)press_data);
 		printf("sent: %s", string_buff);
 
 		printf("%d, %d, %d\n", sizeof(*string_buff), strlen(string_buff), sizeof(&string_buff));
@@ -163,7 +163,7 @@ void test(void *pvParameters)
 void blinky(void *pvParameters)
 {
 	const int blink_gpio = 5;
-	gpio_pad_select_gpio(blink_gpio);
+	esp_rom_gpio_pad_select_gpio(blink_gpio);
 	gpio_set_direction(blink_gpio, GPIO_MODE_OUTPUT);
 
 	while(1)
@@ -179,27 +179,27 @@ void blinky(void *pvParameters)
 }
 
 
-void check_battery(void *pvParameters)
-{
-	//gpio_set_direction(35, GPIO_MODE_INPUT);
-	float vbat;
-	gpio_num_t gpio_num;
+// void check_battery(void *pvParameters)
+// {
+// 	//gpio_set_direction(35, GPIO_MODE_INPUT);
+// 	float vbat;
+// 	gpio_num_t gpio_num;
 
-	adc1_config_width(ADC_WIDTH_BIT_12);
-	adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11); //max 3.9V
-	while(1)
-	{
-		int val = adc1_get_raw(ADC1_CHANNEL_7);
-		adc1_pad_get_io_num(ADC1_CHANNEL_7, &gpio_num);
+// 	adc1_config_width(ADC_WIDTH_BIT_12);
+// 	adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11); //max 3.9V
+// 	while(1)
+// 	{
+// 		int val = adc1_get_raw(ADC1_CHANNEL_7);
+// 		adc1_pad_get_io_num(ADC1_CHANNEL_7, &gpio_num);
 
-		//vbat = gpio_get_level(35);
-		vbat = (3.9 * val / 4096) * 2;
-		ESP_LOGI(TAG_main, "Battery: %f V, at GPIO%d\n", vbat, gpio_num);
-		vTaskDelay(100 / portTICK_PERIOD_MS);
-		//printf("Battery: %d V\n", vbat);
-	}
-	vTaskDelete(NULL);
-}
+// 		//vbat = gpio_get_level(35);
+// 		vbat = (3.9 * val / 4096) * 2;
+// 		ESP_LOGI(TAG_main, "Battery: %f V, at GPIO%d\n", vbat, gpio_num);
+// 		vTaskDelay(100 / portTICK_PERIOD_MS);
+// 		//printf("Battery: %d V\n", vbat);
+// 	}
+// 	vTaskDelete(NULL);
+// }
 
 
 void app_main()
@@ -230,7 +230,7 @@ void app_main()
 	if(xQueue != NULL)
 	{
 		xTaskCreate(blinky, "blinky", 1024, NULL, 0, NULL); // "I'm alive!!!"
-		xTaskCreate(check_battery, "check_battery", 2048, NULL, 0, NULL);
+		// xTaskCreate(check_battery, "check_battery", 2048, NULL, 0, NULL);
 
 	    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 1, NULL);
 

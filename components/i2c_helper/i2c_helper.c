@@ -38,7 +38,7 @@ esp_err_t i2c_helper_write_reg(uint8_t slave_id, uint8_t reg_addr, uint8_t *data
     i2c_master_write(cmd, data_wr, size, ACK_CHECK_EN);
     i2c_master_stop(cmd);
 
-    esp_err_t ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    esp_err_t ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
     return ret;
 }
@@ -52,7 +52,7 @@ esp_err_t i2c_helper_read_reg(uint8_t slave_id, uint8_t reg_addr, uint8_t *data_
     i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
     i2c_master_stop(cmd);
 
-    esp_err_t ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    esp_err_t ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
 	if (ret != ESP_OK) {
         return ret;
@@ -68,7 +68,7 @@ esp_err_t i2c_helper_read_reg(uint8_t slave_id, uint8_t reg_addr, uint8_t *data_
     i2c_master_read_byte(cmd, data_rd + size - 1, NACK_VAL);
     i2c_master_stop(cmd);
 
-    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
     return ret;
 }
