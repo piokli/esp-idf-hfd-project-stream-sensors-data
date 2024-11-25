@@ -231,12 +231,8 @@ void app_main()
 	{
 		xTaskCreate(blinky, "blinky", 1024, NULL, 0, NULL); // "I'm alive!!!"
 		// xTaskCreate(check_battery, "check_battery", 2048, NULL, 0, NULL);
-
 	    xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 1, NULL);
-
 		xTaskCreate(send_sensors_data_task, "send_sensors_data", 4096, NULL, 2, NULL); //sending data through xQueue to tcp_client_task
 		xTaskCreate(tcp_client_task, "tcp_client", 4096, (void*)xQueue, 3, NULL);
-
-		//xTaskCreate(test, "test", 4096, (void*)xQueue, 0, NULL);
 	}
 }
