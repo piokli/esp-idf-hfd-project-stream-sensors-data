@@ -21,22 +21,18 @@ void tcp_client_task(void *pvParameters)
 	char* tx_buffer;
 
     //char rx_buffer[128];
+    char host_ip[] = HOST_IP_ADDR;
     char addr_str[128];
     int addr_family;
     int ip_protocol;
 
     while (1) {
-    	ESP_LOGI(TAG, "Gonna be waiting for established wi-fi");
-    	xEventGroupWaitBits(s_wifi_event_group, BIT0, 1, 0, 15000 / portTICK_PERIOD_MS);
-    	ESP_LOGI(TAG, "wifi is established");
-
         struct sockaddr_in dest_addr;
-        dest_addr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);
+        inet_pton(AF_INET, host_ip, &dest_addr.sin_addr);
         dest_addr.sin_family = AF_INET;
         dest_addr.sin_port = htons(PORT);
         addr_family = AF_INET;
         ip_protocol = IPPROTO_IP;
-        inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
 
         int sock =  socket(addr_family, SOCK_STREAM, ip_protocol);
         if (sock < 0) {
@@ -54,9 +50,10 @@ void tcp_client_task(void *pvParameters)
 
         while (1) {
         	if (!xQueueReceive(getQueue, &tx_buffer, portMAX_DELAY)) {
-        		ESP_LOGE(TAG, "Qeueueueuue BADD");
+        		ESP_LOGE(TAG, "QUEUE NOT OK");
+                break;
         	} else {
-        		ESP_LOGI(TAG, "QUEUE GUT");
+        		ESP_LOGI(TAG, "QUEUE OK");
         	}
 
             int err = send(sock, tx_buffer, strlen(tx_buffer), 0); //MSG_DONTWAIT);
